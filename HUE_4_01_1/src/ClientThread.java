@@ -36,10 +36,11 @@ public class ClientThread extends Thread{
         
             int ctr=0;
             int temp=0;
-            String wt="";
-            String name="";
+            String wt=" ";
+            String name=" ";
+            
             try {
-                stm.executeUpdate("Insert into measurements Values("+name+","+wt+","+temp+")");
+                stm.executeUpdate("Insert into measurements Values('"+name+"','"+wt+"',"+temp+")");
             } catch (SQLException ex) {
                 Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -72,16 +73,22 @@ public class ClientThread extends Thread{
                     }
 
                     if(str.toUpperCase().contains("Temperature".toUpperCase())){
-                        temp=Integer.getInteger(SplitString(str));
+                        temp=Integer.getInteger(SplitString(str)); // prob. some datatype parsing problem...
+                        
                     }
 
                     System.out.println(str);
+                    
+                    
+                    
 
                 }
-
-                stm.executeUpdate("Update Persons set Servername='"+name+"'");
-                stm.executeUpdate("Update Persons set Weathertype='"+wt+"'");
-                stm.executeUpdate("Update Persons set Temperature='"+temp+"'");
+                if(!(name.equals(" ") && wt.equals(" "))){
+                    stm.executeUpdate("Update Persons set Servername='"+name+"' where Servername=' '");
+                    stm.executeUpdate("Update Persons set Weathertype='"+wt+"'where Weathertype=' '");
+                    stm.executeUpdate("Update Persons set Temperature="+temp+"where Servername=0");
+                }
+                
                 conn.close();
 
             }catch(IOException ex){
@@ -103,11 +110,11 @@ public class ClientThread extends Thread{
         for(int i=0;i<str.length();i++){
             char ch [] =str.toCharArray();
             if(ch[i]=='='){
-                index=i;
+                index=i+1;
             }
         }
         
-        str.substring(index);
+        ret=str.substring(index);
             
         return ret;
     }
