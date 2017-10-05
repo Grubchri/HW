@@ -1,9 +1,11 @@
 
 import java.net.*;
 import java.io.*;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
@@ -39,23 +41,21 @@ public class ClientThread extends Thread{
             String wt=" ";
             String name=" ";
             
-            try {
-                stm.executeUpdate("Insert into measurements Values('"+name+"','"+wt+"',"+temp+")");
-            } catch (SQLException ex) {
-                Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
             try{
-
+                temp=0;
+                wt=" ";
+                name=" ";
                 PrintWriter co=new PrintWriter(new BufferedOutputStream(clientSocket.getOutputStream()));
                 co.println("Connected.");
                 co.println("instructions: use Name=<Weaterstation>, Weathertype=<Weathertype> or Temperature=<Temperature>\n the last submitted values will be used in the dbs");
+                co.println("use Analyse like: Analyse=<Weatherstationname>");
                 while(!clientSocket.isClosed()){
                     if(ctr==0){
                         ctr++;
                         co.println("To Exit write Exit");
                     }
 
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                     BufferedReader clientIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     co.flush();
 
@@ -64,30 +64,32 @@ public class ClientThread extends Thread{
                         clientSocket.close();
                     }
 
-                    if(str.toUpperCase().contains("WEATHERSTATION".toUpperCase())){
+                    if(str.toUpperCase().contains("WEATHERTYPE".toUpperCase()+"=")){
                         wt=SplitString(str);
                     }
 
-                    if(str.toUpperCase().contains("Name".toUpperCase())){
+                    if(str.toUpperCase().contains("Name".toUpperCase()+"=")){
                         name=SplitString(str);
                     }
 
-                    if(str.toUpperCase().contains("Temperature".toUpperCase())){
-                        temp=Integer.getInteger(SplitString(str)); // prob. some datatype parsing problem...
-                        
+                    if(str.toUpperCase().contains("Temperature".toUpperCase()+"=")){
+                        temp=Integer.parseInt(SplitString(str));
                     }
-
-                    System.out.println(str);
+                    if(str.toUpperCase().contains("ANALYSE".toUpperCase()+"=")){
+                       String res= Analyse(str);
+                       co.println("Average: "+res);
+                    }
+                    if(str.toUpperCase().contains("HELP".toUpperCase())){
+                        co.println("instructions: use Name=<Weaterstation>, Weathertype=<Weathertype> or Temperature=<Temperature>\n the last submitted values will be used in the dbs");
+                        co.println("use Analyse like: Analyse=<Weatherstationname>");
+                    }
                     
-                    
-                    
-
                 }
                 if(!(name.equals(" ") && wt.equals(" "))){
-                    stm.executeUpdate("Update Persons set Servername='"+name+"' where Servername=' '");
-                    stm.executeUpdate("Update Persons set Weathertype='"+wt+"'where Weathertype=' '");
-                    stm.executeUpdate("Update Persons set Temperature="+temp+"where Servername=0");
+                    stm.executeUpdate("Insert into measurements Values('"+name+"','"+wt+"',"+temp+")");
                 }
+                
+                conn.commit();
                 
                 conn.close();
 
@@ -117,6 +119,36 @@ public class ClientThread extends Thread{
         ret=str.substring(index);
             
         return ret;
+    }
+
+    public String Analyse(String str) throws SQLException,IOException {
+        Connection conn=DriverManager.getConnection("jdbc:oracle:thin:System/rgrh23@Grubchri:1521:XE");
+        stm=conn.createStatement();
+        
+        int avg=0;
+        int ctr=0;
+        String test="";
+        ResultSet rs;
+        
+        rs=stm.executeQuery("Select * from measurements where Servername='"+SplitString(str)+"'");
+        ctr+=stm.executeUpdate("Select count(*) from measurements where Servername='"+SplitString(str)+"'");
+        
+       
+        
+        while(rs.next() || ctr==0){
+            avg+=rs.getInt("TEMPERATURE");
+            test=rs.getNString("Temperature");
+            System.out.println(rs.getString("TEMPERATURE"));
+            ctr++;
+        }
+        
+        System.out.println(test+"_Test");
+        System.out.println(ctr);
+        
+        int r=(avg/ctr);
+        String res=Integer.toString(r);
+        
+        return res;
     }
     
 }
