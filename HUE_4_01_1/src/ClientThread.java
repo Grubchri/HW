@@ -59,7 +59,11 @@ public class ClientThread extends Thread{
                     BufferedReader clientIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     co.flush();
 
-                    String str=clientIn.readLine();
+                    String str=" ";
+                    str=clientIn.readLine();
+                    
+                    System.out.println(str);
+                    
                     if(str.toUpperCase().contains("EXIT")){
                         clientSocket.close();
                     }
@@ -84,7 +88,7 @@ public class ClientThread extends Thread{
                         co.println("use Analyse like: Analyse=<Weatherstationname>");
                     }
                     
-                    System.out.println(str);
+                    
                     
                 }
                 if(!(name.equals(" ") && wt.equals(" "))){
@@ -92,6 +96,9 @@ public class ClientThread extends Thread{
                 }
                 System.out.println(temp);
                 conn.commit();
+                
+                String res= Analyse(name);
+                co.println("Average: "+res);
                 
                 conn.close();
 
@@ -139,9 +146,6 @@ public class ClientThread extends Thread{
             System.out.println(rs.getInt("Temperature"));
             ctr++;
         }
-   
-        System.out.println(ctr+"_Test");
-
         
         int r=(avg/ctr);
         String res=Integer.toString(r);

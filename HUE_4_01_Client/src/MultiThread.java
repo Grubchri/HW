@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 class MultiThread extends Thread{
 
     
-    public void runServer(){
+    public void runServer() throws InterruptedException{
         ServerSocket server;
         try{
             server=new ServerSocket(1111);
@@ -14,6 +14,7 @@ class MultiThread extends Thread{
                 Socket client = server.accept();
                 ClientThread ct=new ClientThread(client);
                 ct.start();
+                client.close();
             }
         }catch(IOException ex){
             System.out.println(ex);

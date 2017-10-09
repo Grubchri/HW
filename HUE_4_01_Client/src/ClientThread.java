@@ -21,132 +21,59 @@ public class ClientThread extends Thread{
     }
     
     public void run(){
-        try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-        } catch (ClassNotFoundException ex) {
-            System.out.println(ex);
-        }
-        Driver myDriver = new oracle.jdbc.driver.OracleDriver();
-        try {
-            DriverManager.registerDriver(myDriver);
-        } catch (SQLException ex) {
-           System.out.println(ex);
-        }
-        try {
-            Connection conn=DriverManager.getConnection("jdbc:oracle:thin:System/rgrh23@Grubchri:1521:XE");
-            stm=conn.createStatement();
-        
-            int ctr=0;
-            int temp=0;
-            String wt=" ";
-            String name=" ";
-            
-            try{
-                temp=0;
-                wt=" ";
-                name=" ";
-                PrintWriter co=new PrintWriter(new BufferedOutputStream(clientSocket.getOutputStream()));
-                co.println("Connected.");
-                co.println("instructions: use Name=<Weaterstation>, Weathertype=<Weathertype> or Temperature=<Temperature>\n the last submitted values will be used in the dbs");
-                co.println("use Analyse like: Analyse=<Weatherstationname>");
-                while(!clientSocket.isClosed()){
-                    if(ctr==0){
-                        ctr++;
-                        co.println("To Exit write Exit");
-                    }
+        final String host="localhost";
+        final int port=1111;
+    
+        while(true){
+            Socket sock;
+            try {
+                sock = new Socket(host,port);
 
-                    Thread.sleep(100);
-                    BufferedReader clientIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    co.flush();
+                BufferedReader br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+                PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
 
-                    String str=clientIn.readLine();
-                    if(str.toUpperCase().contains("EXIT")){
-                        clientSocket.close();
-                    }
+                System.out.println("server says:" + br.readLine());
 
-                    if(str.toUpperCase().contains("WEATHERTYPE".toUpperCase()+"=")){
-                        wt=SplitString(str);
-                    }
+                String n="";
+                n="Name";
 
-                    if(str.toUpperCase().contains("Name".toUpperCase()+"=")){
-                        name=SplitString(str);
-                    }
+                int num=0;
+                num=(int)(Math.random()*29)+1;
 
-                    if(str.toUpperCase().contains("Temperature".toUpperCase()+"=")){
-                        temp=Integer.parseInt(SplitString(str));
+                String wt;
+
+                if(num>0 && num<15){
+                    wt="cloudy";
+                }else{
+                    if(num>15){
+                        wt="sunny";
+                    }else{
+                        wt="cold";
                     }
-                    if(str.toUpperCase().contains("ANALYSE".toUpperCase()+"=")){
-                       String res= Analyse(str);
-                       co.println("Average: "+res);
-                    }
-                    if(str.toUpperCase().contains("HELP".toUpperCase())){
-                        co.println("instructions: use Name=<Weaterstation>, Weathertype=<Weathertype> or Temperature=<Temperature>\n the last submitted values will be used in the dbs");
-                        co.println("use Analyse like: Analyse=<Weatherstationname>");
-                    }
-                    
-                    System.out.println(str);
-                    
                 }
-                if(!(name.equals(" ") && wt.equals(" "))){
-                    stm.executeUpdate("Insert into measurements Values('"+name+"','"+wt+"',"+temp+")");
-                }
-                System.out.println(temp);
-                conn.commit();
-                
-                conn.close();
 
-            }catch(IOException ex){
-                System.out.println(ex);
+                n="Name="+n;
+                out.println(n);
+
+                wt="Weathertype="+wt;
+                out.println(wt);
+                String temp="Temperature="+Integer.toString(num);
+                out.println(temp);
+                out.println("Exit");
+                System.out.println(wt+" "+n+" "+temp);
+
+                System.out.println("server says:" + br.readLine());
+                Thread.sleep(1000);
+                sock.close();
+
+            } catch (IOException ex) {
+                Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
             } catch (InterruptedException ex) {
-                System.out.println(ex);
-            } catch (SQLException ex) {
                 Logger.getLogger(ClientThread.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-    }
-
-    private String SplitString(String str) {
-        String ret="";
-        int index=0;
-        
-        for(int i=0;i<str.length();i++){
-            char ch [] =str.toCharArray();
-            if(ch[i]=='='){
-                index=i+1;
-            }
-        }
-        
-        ret=str.substring(index);
             
-        return ret;
-    }
-
-    public String Analyse(String str) throws SQLException,IOException {
-        Connection conn=DriverManager.getConnection("jdbc:oracle:thin:System/rgrh23@Grubchri:1521:XE");
-        stm=conn.createStatement();
-        
-        int avg=0;
-        int ctr=0;
-        String test="";
-        ResultSet rs;
-        
-        rs=stm.executeQuery("Select * from measurements where Servername='"+SplitString(str)+"'");
-        
-        while(rs.next()){
-            avg+=rs.getInt("Temperature");
-            System.out.println(rs.getInt("Temperature"));
-            ctr++;
         }
-   
-        System.out.println(ctr+"_Test");
-
         
-        int r=(avg/ctr);
-        String res=Integer.toString(r);
-        
-        return res;
     }
     
 }
