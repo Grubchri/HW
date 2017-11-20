@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <Trainingseinheit name="Joggen">
+      <Start>14</Start>
+      <Ende>16</Ende>
+      <Kategorie>Laufsport</Kategorie>
+      <Route>
+        <Wegpunkte>4,8,14</Wegpunkte>
+        <Pulse>135,140,120</Pulse>
+        <Geschwindigkeiten>8,13,10</Geschwindigkeiten>
+      </Route>
+      <Geraete>
+        <Schuhe>Laufschuhe</Schuhe>
+        <Weiteres>Laufhantel</Weiteres>
+      </Geraete>
+    </Trainingseinheit>
+	<Trainingseinheit name="Schwimmen">
+      <Start>9</Start>
+      <Ende>15</Ende>
+      <Kategorie>Wassersport</Kategorie>
+      <Route>
+        <Wegpunkte>1,2,4</Wegpunkte>
+        <Pulse>140,140,120</Pulse>
+        <Geschwindigkeiten>10,16,14</Geschwindigkeiten>
+      </Route>
+      <Geraete>
+        <Schuhe>Flossen</Schuhe>
+        <Weiteres>Schwimmsachen</Weiteres>
+      </Geraete>
+    </Trainingseinheit>
+    <Trainingseinheit name="Jagen">
+      <Start>5</Start>
+      <Ende>20</Ende>
+      <Kategorie>Jagdsport</Kategorie>
+      <Route>
+        <Wegpunkte>9,10,11</Wegpunkte>
+        <Pulse>125,120,120</Pulse>
+        <Geschwindigkeiten>3,1,1</Geschwindigkeiten>
+      </Route>
+      <Geraete>
+        <Schuhe>Jagdgamaschen</Schuhe>
+        <Weiteres>Flinte</Weiteres>
+      </Geraete>
+    </Trainingseinheit>
+</root>
